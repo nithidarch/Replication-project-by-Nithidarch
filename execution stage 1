@@ -1,0 +1,72 @@
+---
+title: 'Replication Project: ''Volatility estimation for Bitcoin: A comparison of
+  GARCH Models'''
+author: "Miss Nithidar Chirakajonwongse, Kobe University, Faculty of Economics"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+This project is the replication project of the 'Volatility estimation for Bitcoin: A comparison of GARCH Models'research paper. In this report, the comparison of data and statistics results are executed.
+
+According to the model paper, data for this project can be obtained from the 'http://www.coindesk.com/price'. However, due to unknown reason, data which is provided by the website is not completed. Thus, the author of this replication paper has to download the data from 'coindeskr'package instead. Additionally, after the verification, it is clear that the data from both sides(coindesk website and coindesk package) are not exactly the same.Hence, the diffenrence in the result may be explained by this reason.
+
+The below code is the code for calculating the returns which is caluculated by finding the ratio of two consecutive prices and take the natural logarithm of it. After that the Mean, Median, Maximum, Minimum, Standard Deviation, Skewness, and Kurtosis of the reuturns are calculated as well.
+
+```{r}
+library(coindeskr)
+data <- get_historic_price(currency = "USD", start = "2010-07-18", end = "2016-10-01")
+
+#a vector containing log of ratios of consecutive prices
+lpd<-array(dim=(nrow(data)-1))
+#create array that row = row of data -1 due to ratio of consec. no.
+for(j in 1:(nrow(data)-1)){lpd[j]<-log(data[j+1,1])-log(data[j,1])}
+#for j in each row, lpd[j]is log of ratio of consec.data
+
+#vector of returns
+ret<-lpd
+
+mean(ret)
+median(ret)
+max(ret)
+min(ret)
+sd(ret)
+skewness(ret)
+kurtosis(ret)
+
+```
+
+The above results can be compared to the original paper results as followed:
+
+Original Mean = 0.005778
+Original Median = 0.000290
+Original Maximum = 0.528947
+Original Minimum = -0.388309
+Original Std. Dev. = 0.061737
+Original skewness = 0.857187
+Original kurtosis = 15.11666
+
+
+The plot of prices
+
+```{r}
+
+price.ts <- as.xts(data)
+plot(price.ts)
+
+```
+
+The plot of price returns
+
+```{r}
+returns.ts<-as.zoo(data)[-1,]
+for(j in 1:(nrow(ret))){returns.ts[j]<-ret[j]}
+#for j in row of ret, given 1 = no. 1 repeatedly
+returns.ts<-as.xts(returns.ts)
+plot(returns.ts)
+```
+
+
